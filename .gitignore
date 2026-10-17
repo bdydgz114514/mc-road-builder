@@ -1,0 +1,18 @@
+﻿__pycache__/
+*.pyc
+
+# 运行时产物：方块回读二进制、世界数据库、日志、截图、停机旗标、断点
+blockmap.bin
+fastchan.bin
+world.db
+state.log
+events.log
+*.log
+HALT
+west_end.txt
+shots/
+*.png
+
+# 本地校准/临时补丁
+calib.json
+patch*.py
