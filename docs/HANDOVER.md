@@ -948,3 +948,53 @@ GET /chat?msg=             cmd '#goto x y z' / '#mine stone' / '#stop'
 **剩下的活**：从 `x=-7950` 继续向东。前方 `terrain_profile.py` 显示
 -7949..-7960 是陆地（63~67），到 -7890 之前还要过几道山脊和低洼；
 遇到 WATER 就用 `bridge.py` 起拱，peak 按跨度的 1/4 取（17 列跨河用 peak=4 效果已验证）。
+
+
+---
+
+## 五、第七轮：发布与收尾（本次会话结束）
+
+### 5.1 停机时的准确状态
+
+```
+断点（下一个要建的列）  west_end.txt = -1085
+已完工                东段 -8318..-7888；西段 -389..-1085（含 -463..-482 拱桥）
+剩余缺口              6803 列（-1085 → -7888）
+游戏                  已关闭（java 进程不存在）
+所有 python 进程      已终止，HALT 已写「用户手动停止」
+```
+
+### 5.2 已发布到 GitHub
+
+**https://github.com/PlayerName114514/mc-road-builder**（public，MIT，v1.0.0）
+
+只发布了 32 个核心文件；68 个一次性 patch、30MB world.db、16MB blockmap.bin、
+全部日志截图都排除在外。脱敏处理：本机路径 / 用户名 / 服务器地址 / 玩家名全部替换为占位。
+
+发布用的一次性令牌注入，`.git/config` 已验无残留。
+
+### 5.3 经验已录入知识库
+
+`kb/minecraft-client-kb/knowledge/12-长跑自动化与守护体系.md`（8.1 KB）
+索引同步更新于 `kb/minecraft-client-kb/README.md` 与 `.dsh/skills/minecraft-client-kb/SKILL.md`。
+
+第 11 章是「怎么挖和放」，第 12 章是「怎么连续跑几小时不崩不跑偏」。
+
+### 5.4 下次开机怎么接
+
+```powershell
+cd D:\mc-road-builder
+.\launch-mc.ps1     # 没开游戏就先这个（开游戏 + 自动进服）
+.\resume.ps1        # 探桥 → 清 HALT → 读断点 -1085 → 拉起全链
+```
+
+`resume.ps1` 会拉起 watchdog（只盯 G*，Guxiaoge 排除）/ 15 秒截图 / keeplive / runner，
+runner 再从 -1085 继续往西铺。
+
+### 5.5 本会话最后一轮的关键改动（都在文件里了）
+
+- `raise_deck.guard_hp()` / `keeplive` / `auto_west` 三处闸门：死亡先 `#stop` 再复活，且用 `last_death` 事件判据
+- `travel()` 距离 > 40 格一律 `/home` → `/back`，不走路
+- `repair.is_wet()` 往下看 6 格，水列不作站位；`water_run >= 2` 起拱，`>= 12` 先备料
+- `toolkit.ensure_pick_count(3)` + 自动补锹 + 木头余量 8
+- `runner.py`（守护）、`shots_daemon.py`（15 秒截图）、`resume.ps1`（一键拉起）
